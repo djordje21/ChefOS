@@ -1,4 +1,6 @@
-# ChefOS — Phase 1 Status (verified 13 Oct 2026)
+# ChefOS — Phase 1 Status (snapshot of 13 Oct 2026)
+
+> Historical snapshot of Phase 1. For the current state see `08-phase-2.0-status.md` (CI has since run green; E2E tests and generated types were added in Phase 2.0).
 
 This document separates what is **implemented and tested**, what is **implemented but not yet verified against real Supabase**, and what is **documentation / planned**. Nothing has been deployed. No production credentials were used or needed.
 
@@ -139,7 +141,7 @@ ChefOS/
 | Mutation check (proves tests catch weakened security) | `scripts/security-mutation-check.sh` |
 | Unit tests | `tests/unit/*.test.ts` |
 | Secret / confidential-data scanner | `scripts/check-secrets.mjs` |
-| CI | `.github/workflows/ci.yml` (written, **not yet run**) |
+| CI | `.github/workflows/ci.yml` (green since 13 Oct 2026) |
 | **Supabase setup documentation** | `docs/06-supabase-setup.md` |
 | Application code | `src/` (Next.js App Router; `src/proxy.ts` refreshes sessions and guards private routes) |
 

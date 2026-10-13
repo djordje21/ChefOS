@@ -1,6 +1,6 @@
 # ChefOS — Implementation Plan (v2)
 
-Status: architecture approved; Phase 1 starts once Supabase setup (`06-supabase-setup.md`) is done.
+Status (14 Oct 2026): Phase 1 done and green in CI. Phase 2.0 (security hardening) done — see `08-phase-2.0-status.md`. Phase 2.1 costing engine implemented as an isolated module (`09-costing-engine.md`). Nothing deployed.
 
 ## Stack (unchanged)
 
@@ -19,16 +19,18 @@ Status: architecture approved; Phase 1 starts once Supabase setup (`06-supabase-
 | # | Deliverable | Done when |
 |---|---|---|
 | 0 ✅ | Workbook audit, data model, architecture assessment | Approved by you |
-| 1 🟡 | **Foundation, isolation-first** (implemented locally, see `07-phase1-status.md`): | All local checks green; remote verification pending |
-| 1a ✅ | Working login: sign-up with email confirmation, sign-in, sign-out, password reset, change password | App builds; flows need a Supabase project for an end-to-end run |
+| 1 ✅ | **Foundation, isolation-first** (see `07-phase1-status.md`): | Green in CI, incl. database tests on a local Supabase stack |
+| 1a ✅ | Working login: sign-up with email confirmation, sign-in, sign-out, password reset, change password | Sign-up → email confirmation → sign-in → sign-out covered by Playwright E2E in CI; password reset not yet E2E-tested |
 | 1b ✅ | Controlled workspace creation (confirmed email, plan limit, creator = owner of that workspace only) | DB tests |
 | 1c ✅ | Invitations: hashed single-use tokens, email-bound, expiry, revoke, role + outlet grants, least privilege | DB tests |
 | 1d ✅ | Membership management: change role, all-outlets / restricted, remove, leave, last-owner protection | DB tests |
 | 1e ✅ | Outlet-level permissions separate from workspace permissions; outlet CRUD; per-outlet access | DB tests |
 | 1f ✅ | Audit log (trigger-written, append-only), plans/limits (no billing) | DB tests |
 | 1g ✅ | Automated security tests: catalog-generated isolation tests, RLS/grant invariants, composite-FK checks, mutation check proving the tests catch weakened protections, secret scan of repo and client bundle | 60 DB + 17 unit tests, 8/8 sabotages detected |
-| 1h ⏳ | CI on GitHub Actions (written, not yet run); end-to-end browser tests (Playwright) against `supabase start` | Runs once the branch is pushed / a Supabase project exists |
-| 2 | **Costing engine** + workspace configuration (policy versions, tax rates, units, conversions, categories) | Engine suite 6.2 (1–11) green |
+| 1h ✅ | CI on GitHub Actions; end-to-end browser tests (Playwright) against `supabase start` | Done in Phase 2.0 |
+| 2.0 ✅ | **Security hardening** (audit H1, M1, M2): invitation re-validation and auto-revocation, no acceptance into suspended workspaces, deactivated outlets grant nothing; regression tests and mutation sabotages; Playwright E2E; generated DB types checked in CI | `08-phase-2.0-status.md` |
+| 2.1 ✅ | **Costing engine** as a pure, isolated module (`src/lib/costing`, not wired to DB/UI) | `09-costing-engine.md`; unit suite green |
+| 2.2 | Workspace configuration in the database (policy versions, tax rates, units, conversions, categories) + wiring the engine | Engine results stored as snapshots; isolation fixture covers new tables |
 | 3 | Ingredients, suppliers, supplier products, prices with approval; preferred supplier (Supplier Intelligence foundations, schema per `05` §7) | Price-change tests green; search, bulk edit and CSV/XLSX work |
 | 4 | Recipe builder: versions, sub-recipes, scaling, allergens/tags, validation flags | Sub-recipe, scaling and snapshot tests green |
 | 5 | Dishes and pricing (what-if), dashboard, price-change impact | Dashboard figures come from the database only |

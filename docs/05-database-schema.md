@@ -42,7 +42,7 @@ Rules:
 * **Open registration** goes through Supabase Auth (email + password) with **email confirmation required**. No session is issued until the address is confirmed.
 * **Controlled workspace creation:** only through the RPC `create_workspace(name, base_currency, locale, timezone, template?)`. It requires a confirmed email and checks the plan limit `max_owned_workspaces`. It makes the caller **owner of that new workspace only**.
 * **Least privilege:** a user gets rights only by creating their own workspace or by accepting an invitation, and the invitation states the role. There is **no platform-admin role in the application**. Platform administration happens only with the secret key or SQL, outside the app.
-* Invitation acceptance (RPC `accept_invitation(token)`) checks that the email matches and the token has not expired. Single use.
+* Invitation acceptance (RPC `accept_invitation(token)`) checks that the email matches, the token is open and unexpired (single use), the workspace is **active**, and that the **sender could still grant it today**: still an active member with `member.manage`, holding every permission of the invited role, all-outlet access if the invitation grants it, and every granted outlet permission. Open invitations that stop qualifying are revoked automatically (`revoked_reason`: `inviter_access_changed`, `outlet_deactivated`; also `manual`, `replaced`).
 * Members can never raise their own role. Only holders of `member.manage` can change roles, and nobody can remove or demote the last owner.
 
 ## 3. Permissions: workspace level vs outlet level — P1
@@ -82,6 +82,8 @@ System roles seeded into each new workspace (editable copies):
 | Recipe library (`recipes.outlet_id IS NULL`) | Outlet recipes (`recipes.outlet_id = X`) |
 | Costing policy (default) | Optional policy override per outlet (P2+) |
 | | Optional preferred-supplier override per outlet (P2+) |
+
+**Deactivated outlets** grant no outlet-level permission to anyone (also not to all-outlet members). Only holders of `outlet.manage` still see them, in order to reactivate. Outlet assignments are kept and apply again after reactivation. No new access can be granted on an inactive outlet.
 
 Editing the shared library requires `recipe.library.edit` (workspace level). An outlet-restricted chef can **use** library recipes but cannot edit them. (The spike let any member edit library recipes; the real policies check the permission.)
 
