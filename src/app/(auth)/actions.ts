@@ -34,6 +34,7 @@ export async function signIn(_: FormState, form: FormData): Promise<FormState> {
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) {
+    if (error.status === 0 || error.name === "AuthRetryableFetchError") return { error: "The sign-in service cannot be reached. Try again in a moment." };
     if (error.code === "email_not_confirmed") return { error: "Confirm your email address first — check your inbox." };
     return { error: "Incorrect email or password." };
   }

@@ -11,7 +11,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const next = safeNextPath(params.next);
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-semibold">Sign in</h1>
+      <h1 className="display text-2xl">Sign in</h1>
       {params.error === "link" && <Alert tone="error">That link is invalid or has expired. Request a new one.</Alert>}
       {params.confirmed && <Alert tone="success">Email confirmed. You can sign in now.</Alert>}
       <ActionForm action={signIn}>

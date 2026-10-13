@@ -7,7 +7,7 @@ export default function SignUpPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold">Create your account</h1>
+        <h1 className="display text-2xl">Create your account</h1>
         <p className="mt-1 text-sm text-muted">You will confirm your email before you can create or join a workspace.</p>
       </div>
       <SignUpForm />

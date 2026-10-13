@@ -21,6 +21,7 @@ npm run build && npm run test:e2e   # see e2e/README.md
 
 ## Documentation
 
+* `docs/10-ui-preview.md` — interface preview: routes, what is real vs prototype, how to run the demo
 * `docs/08-phase-2.0-status.md` — current status: changes, tests, CI results, remaining risks
 * `docs/09-costing-engine.md` — costing engine: definitions, configuration, guarantees
 * `docs/07-phase1-status.md` — Phase 1 snapshot (file tree, commands)
