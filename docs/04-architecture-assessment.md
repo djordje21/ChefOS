@@ -1,6 +1,6 @@
 # ChefOS — Architecture Assessment: Universal Workspaces
 
-Status: **proposal, awaiting approval.** No application code has been written yet.
+Status: **approved 13 Oct 2026** (Q1–Q5 below, with clarifications). Detailed schema: `05-database-schema.md`. Setup: `06-supabase-setup.md`.
 
 ## 1. Current state of the codebase (inspected 13 Oct 2026)
 
@@ -140,3 +140,12 @@ There is no live code or data, so no data migration is needed. The plan:
 | Q3 | Hotel = one workspace with outlets, with members optionally limited to particular outlets? | Yes. Cross-workspace sharing deferred |
 | Q4 | Self sign-up with workspace creation, or invite-only for now? | Self sign-up; billing deferred |
 | Q5 | The earlier Q1–Q9 audit questions now become **per-workspace settings**. Are you happy for them to be answered as settings in your own workspace rather than as product rules? | Yes |
+
+### Decisions (13 Oct 2026)
+
+1. Demo = fictional data only. No real workbook prices or business information in the repo or the demo. The owner imports the real workbook privately.
+2. Multiple workspaces per user, with independent roles. Consultants work across clients with no cross-exposure.
+3. Hotel = one workspace with many outlets. Outlet-level permissions are separate from workspace-level ones. Ingredients and suppliers are shared; recipes, menus, selling prices and reports can be outlet-specific.
+4. Open registration with email verification, controlled workspace creation and least privilege. No automatic admin rights. Plans and limits are modelled; no billing in Phase 1.
+5. Every costing rule is configurable per workspace and versioned. Historical calculations are reproducible from the settings and approved prices of their period.
+6. Supplier Intelligence is designed into the schema now (see `05` §7) and built after the foundation.
