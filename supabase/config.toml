@@ -31,6 +31,10 @@ enable_anonymous_sign_ins = false
 minimum_password_length = 12
 password_requirements = "letters_digits"
 
+[auth.rate_limit]
+# Local stack only: allow the E2E suite to send several confirmation emails.
+email_sent = 100
+
 [auth.email]
 enable_signup = true
 enable_confirmations = true

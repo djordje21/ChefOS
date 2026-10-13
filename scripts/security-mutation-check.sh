@@ -15,6 +15,11 @@ SABOTAGES=(
   "create or replace function private.active_owner_count(p_workspace_id uuid) returns int language sql stable security definer set search_path = '' as \$\$ select 99 \$\$;"
   "grant select on public.workspaces to anon;"
   "alter table public.outlet_memberships drop constraint outlet_memberships_workspace_id_outlet_id_fkey; alter table public.outlet_memberships add foreign key (outlet_id) references public.outlets (id);"
+  # Phase 2.0 hardening: each sabotage below rewrites one function body in place.
+  "do \$\$ begin execute replace(pg_get_functiondef('public.accept_invitation(text)'::regprocedure), 'if not private.invitation_still_grantable(v_inv.id) then', 'if false then'); end \$\$;"
+  "drop trigger revoke_invitations_on_membership_change on public.memberships;"
+  "do \$\$ begin execute replace(pg_get_functiondef('public.accept_invitation(text)'::regprocedure), 'and status = ''active'') then', 'and status is not null) then'); end \$\$;"
+  "do \$\$ begin execute replace(pg_get_functiondef('private.user_has_outlet_perm(uuid,uuid,uuid,text)'::regprocedure), 'and o.active', 'and true'); end \$\$;"
 )
 missed=0
 for i in "${!SABOTAGES[@]}"; do

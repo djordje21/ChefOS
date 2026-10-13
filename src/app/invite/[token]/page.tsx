@@ -7,6 +7,13 @@ import { acceptInvitation } from "../../app/actions";
 
 export const metadata = { title: "Invitation" };
 
+const STATE_MESSAGES: Record<string, string> = {
+  accepted: "This invitation has already been used.",
+  revoked: "This invitation has been revoked. Ask for a new one.",
+  expired: "This invitation has expired. Ask for a new one.",
+  invalid: "This invitation can no longer be accepted. Ask the workspace for a new one.",
+};
+
 type Preview = { workspace_name: string; role_name: string; email: string; invited_by_name: string; expires_at: string; state: string };
 
 export default async function InvitePage({ params }: { params: Promise<{ token: string }> }) {
@@ -25,7 +32,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
         {!invite ? (
           <Alert tone="error">This invitation link is not valid.</Alert>
         ) : invite.state !== "open" ? (
-          <Alert tone="error">This invitation has {invite.state === "accepted" ? "already been used" : invite.state === "revoked" ? "been revoked" : "expired"}. Ask for a new one.</Alert>
+          <Alert tone="error">{STATE_MESSAGES[invite.state] ?? STATE_MESSAGES.invalid}</Alert>
         ) : (
           <div className="space-y-4">
             <h1 className="text-lg font-semibold">Join {invite.workspace_name}</h1>
