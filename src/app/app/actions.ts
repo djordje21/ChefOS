@@ -127,7 +127,8 @@ export async function setOutletAccess(_: FormState, form: FormData): Promise<For
   const { supabase } = await requireUser();
   const { error } = await supabase.rpc("set_outlet_access", {
     p_workspace_id: parsed.data.workspaceId, p_user_id: parsed.data.userId,
-    p_outlet_id: parsed.data.outletId, p_role_id: parsed.data.roleId,
+    // NULL removes the access. The SQL function accepts it; generated types mark every argument non-null.
+    p_outlet_id: parsed.data.outletId, p_role_id: parsed.data.roleId as string,
   });
   if (error) return { error: userMessage(error) };
   revalidatePath(`/app/w/${parsed.data.workspaceId}/members`);

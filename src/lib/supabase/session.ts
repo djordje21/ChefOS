@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { publicEnv } from "@/lib/env";
+import type { Database } from "./database.types";
+import { sameHostUrl } from "@/lib/redirect";
 
 const PROTECTED_PREFIXES = ["/app", "/account"];
 
@@ -8,7 +10,7 @@ const PROTECTED_PREFIXES = ["/app", "/account"];
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
   const { url, key } = publicEnv();
-  const supabase = createServerClient(url, key, {
+  const supabase = createServerClient<Database>(url, key, {
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll: (toSet) => {
@@ -26,10 +28,7 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   if (!user && PROTECTED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`))) {
-    const login = request.nextUrl.clone();
-    login.pathname = "/login";
-    login.search = `?next=${encodeURIComponent(path + request.nextUrl.search)}`;
-    return NextResponse.redirect(login);
+    return NextResponse.redirect(sameHostUrl(request, `/login?next=${encodeURIComponent(path + request.nextUrl.search)}`));
   }
   return response;
 }
