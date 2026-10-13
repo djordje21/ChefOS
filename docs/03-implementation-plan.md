@@ -1,41 +1,35 @@
-# ChefOS — Implementation Plan
+# ChefOS — Implementation Plan (v2)
 
-Status: **awaiting approval** (see the open questions at the end of the audit report, Q1–Q9).
+Status: **awaiting approval** of `04-architecture-assessment.md` (questions Q1–Q5).
 
-## Stack (as proposed in the brief; no change recommended)
+## Stack (unchanged)
 
-| Layer | Choice | Why / trade-off |
-|---|---|---|
-| App | Next.js (App Router) + TypeScript + React + Tailwind | Server components and server actions keep authorization on the server |
-| DB/Auth | Supabase (PostgreSQL, Auth, RLS, Storage) | RLS gives tenant isolation inside the database itself. Trade-off: you need a Supabase project (free tier is enough to start) |
-| Money math | `decimal.js` in a pure TypeScript package `@chefos/costing` | One engine used by the UI, the API, exports and tests. Matches Excel ROUND (half away from zero) |
-| Migrations | Supabase SQL migrations in git | Additive only; no destructive migration without your approval |
-| Tests | Vitest (engine and import), Playwright (end-to-end), pgTAP or SQL tests for RLS | Fixtures from audit §5 |
-| Exports | `exceljs` (XLSX), `@react-pdf/renderer` (technical sheets) | Both run server-side |
-| Hosting | Vercel + Supabase | Backups: Supabase daily backups plus a scheduled `pg_dump` export |
+| Layer | Choice |
+|---|---|
+| App | Next.js (App Router) + TypeScript + React + Tailwind |
+| DB/Auth/Storage | Supabase (PostgreSQL, Auth, RLS, Storage) |
+| Costing engine | Pure TypeScript package with `decimal.js`. No business constants; policy passed in |
+| Migrations | SQL migrations in git, additive only; destructive changes only with explicit approval |
+| Tests | Vitest (engine, importer), SQL/RLS tests against real Postgres, Playwright (end-to-end) |
+| Exports | `exceljs`, `@react-pdf/renderer` (server-side) |
+| Hosting | Vercel + Supabase; daily backups plus scheduled `pg_dump` |
 
 ## Phases
 
-| Step | Deliverable | Done when |
+| # | Deliverable | Done when |
 |---|---|---|
-| 1 ✅ | Workbook audit + independent re-calculation | Done: all values reconcile; issues and questions documented |
-| 2–3 ✅ | Data model + this plan | Waiting for approval |
-| 4 | Foundation: Next.js app, Supabase schema + RLS, auth, roles, org/outlet setup, audit log | You can sign up, create an org, invite a user; RLS tests pass |
-| 4b | Workbook import: preview → commit, row-level report, idempotent re-import | The source workbook imports with a report; the totals reconcile to Excel (source workbook totals) |
-| 5 | Ingredients (CRUD, price history, packs, search, bulk edit, CSV/XLSX) + Recipe builder (versions, sub-recipes, scaling, validation flags) | Tests T1–T7, T12–T16 pass |
-| 6 | Dishes and pricing (VAT, targets, overrides, rounding mode, what-if), Dashboard, price-change impact | Tests T8–T11, T17–T18 pass |
-| 7 | Full automated test suite, including permissions and organization isolation | CI green |
-| 8 | Reconciliation report: app vs Excel, per dish | Zero unexplained differences |
-| 9 | Exports (technical sheet PDF/XLSX, costing report XLSX, full workbook export) + UX polish, mobile | |
-| 10 | Deployment guide + list of completed, incomplete and deferred features | |
-| Later | Supplier offer comparison & menu engineering with POS import → Pre-opening PM → Portfolio site → AI assistant | Each one reviewed separately |
+| 0 ✅ | Workbook audit, data model, architecture assessment | Approved by you |
+| 1 | **Foundation, isolation-first:** auth, workspaces, outlets, memberships, roles/permissions, invitations, audit log, composite FKs, RLS | Isolation suite 6.1 green; you can sign up, create an empty workspace and invite a user |
+| 2 | **Costing engine** + workspace configuration (policy versions, tax rates, units, conversions, categories) | Engine suite 6.2 (1–11) green |
+| 3 | Ingredients, suppliers, supplier products, price lists, price approval | Price-change tests green; search, bulk edit and CSV/XLSX work |
+| 4 | Recipe builder: versions, sub-recipes, scaling, allergens/tags, validation flags | Sub-recipe, scaling and snapshot tests green |
+| 5 | Dishes and pricing (what-if), dashboard, price-change impact | Dashboard figures come from the database only |
+| 6 | **Generic import framework:** column mapping, preview, report, idempotent re-import; ingredient list, supplier price list, full workbook. Onboarding paths | The source workbook imports into your private workspace and reproduces the workbook under the Excel-compatible policy |
+| 7 | Demo workspace (content per Q1), templates (copy-on-create) | Demo is labelled, separate, resettable |
+| 8 | Exports (technical sheet PDF/XLSX, costing reports, workbook export) + mobile polish | |
+| 9 | Deployment guide; completed, incomplete and deferred feature list | |
+| Later | Menu engineering with POS import → Pre-opening PM → Portfolio site → AI assistant | Each one reviewed separately |
 
-## Import principles
+## Data confidentiality
 
-* The original workbook is never modified. Each import is a batch with a file hash and a preview.
-* Nothing is merged, renamed or re-priced automatically. Suspected duplicates and anomalies are flagged for review.
-* Totals are imported with the **current** workbook rules (net basis, 3% allowance everywhere, nearest rounding), so the first reconciliation is exact. Any rule change you approve is then applied as an explicit, logged step whose before/after impact can be seen.
-
-## Confidential data
-
-The GitHub repo is public. Workbook data, prices and the full audit stay out of git (`private/` is ignored) until you decide otherwise. Real data will live only in Supabase.
+The repository is public. Customer data, including the source workbook and prices, is never committed. It lives only in the workspace database. Test fixtures in git are synthetic.
