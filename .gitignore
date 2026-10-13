@@ -1,6 +1,17 @@
+# business data and local secrets — never commit
 private/
 *.xlsx
-__pycache__/
-node_modules/
+*.xls
+*.xlsm
 .env*
 !.env.example
+
+# build / tooling
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+__pycache__/
+.DS_Store

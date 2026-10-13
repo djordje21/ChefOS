@@ -19,7 +19,15 @@ Status: architecture approved; Phase 1 starts once Supabase setup (`06-supabase-
 | # | Deliverable | Done when |
 |---|---|---|
 | 0 ✅ | Workbook audit, data model, architecture assessment | Approved by you |
-| 1 | **Foundation, isolation-first:** Next.js app, Supabase Auth (email verification), profiles, workspaces, outlets, memberships, workspace and outlet roles/permissions, invitations, plans/limits (no billing), audit log, composite FKs, RLS, CI (lint, typecheck, unit, RLS tests, secret scan, migration deploy) | Isolation suite 6.1 green in CI; you can sign up, verify email, create an empty workspace, add outlets, invite a user with an outlet-restricted role, and that user sees only what they should |
+| 1 🟡 | **Foundation, isolation-first** (implemented locally, see `07-phase1-status.md`): | All local checks green; remote verification pending |
+| 1a ✅ | Working login: sign-up with email confirmation, sign-in, sign-out, password reset, change password | App builds; flows need a Supabase project for an end-to-end run |
+| 1b ✅ | Controlled workspace creation (confirmed email, plan limit, creator = owner of that workspace only) | DB tests |
+| 1c ✅ | Invitations: hashed single-use tokens, email-bound, expiry, revoke, role + outlet grants, least privilege | DB tests |
+| 1d ✅ | Membership management: change role, all-outlets / restricted, remove, leave, last-owner protection | DB tests |
+| 1e ✅ | Outlet-level permissions separate from workspace permissions; outlet CRUD; per-outlet access | DB tests |
+| 1f ✅ | Audit log (trigger-written, append-only), plans/limits (no billing) | DB tests |
+| 1g ✅ | Automated security tests: catalog-generated isolation tests, RLS/grant invariants, composite-FK checks, mutation check proving the tests catch weakened protections, secret scan of repo and client bundle | 60 DB + 17 unit tests, 8/8 sabotages detected |
+| 1h ⏳ | CI on GitHub Actions (written, not yet run); end-to-end browser tests (Playwright) against `supabase start` | Runs once the branch is pushed / a Supabase project exists |
 | 2 | **Costing engine** + workspace configuration (policy versions, tax rates, units, conversions, categories) | Engine suite 6.2 (1–11) green |
 | 3 | Ingredients, suppliers, supplier products, prices with approval; preferred supplier (Supplier Intelligence foundations, schema per `05` §7) | Price-change tests green; search, bulk edit and CSV/XLSX work |
 | 4 | Recipe builder: versions, sub-recipes, scaling, allergens/tags, validation flags | Sub-recipe, scaling and snapshot tests green |

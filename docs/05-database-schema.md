@@ -2,7 +2,7 @@
 
 Supersedes the table lists in `02-data-model.md` wherever they differ. Approved decisions: `04-architecture-assessment.md` §7 (all five recommendations approved, with clarifications).
 
-Legend: **P1** = built in Phase 1 · **P2+** = specified now, built later (no Phase 1 decision may block it).
+Phase 1 implementation: `supabase/migrations/` (see `07-phase1-status.md`). Legend: **P1** = built in Phase 1 · **P2+** = specified now, built later (no Phase 1 decision may block it).
 
 ---
 
@@ -55,7 +55,7 @@ Rules:
 | `outlets` | id, workspace_id, name, type (restaurant / bar / breakfast / banqueting / room_service / other), active |
 | `outlet_memberships` | workspace_id, outlet_id, user_id, outlet_role_id. Requires an existing workspace membership; cascades when that membership is removed |
 
-**Workspace-level permissions:** `workspace.settings`, `member.manage`, `outlet.manage`, `ingredient.view`, `ingredient.edit`, `supplier.view`, `supplier.edit`, `supplier.approve`, `price.view`, `price.edit`, `price.approve`, `recipe.library.edit`, `recipe.library.approve`, `import.run`, `export.run`, `report.workspace`.
+**Workspace-level permissions:** `workspace.settings`, `member.manage`, `outlet.manage`, `audit.view`, `ingredient.view`, `ingredient.edit`, `supplier.view`, `supplier.edit`, `supplier.approve`, `price.view`, `price.edit`, `price.approve`, `recipe.library.edit`, `recipe.library.approve`, `import.run`, `export.run`, `report.workspace`.
 
 **Outlet-level permissions:** `outlet.view`, `recipe.edit`, `recipe.approve`, `menu.edit`, `menu.price.edit`, `menu.approve`, `report.outlet`.
 
@@ -97,7 +97,7 @@ Limits are enforced in RPCs and insert triggers and are read from `plans`. A fut
 
 ## 5. Audit — P1
 
-`audit_log(id, workspace_id, actor_user_id, entity, entity_id, action, before jsonb, after jsonb, at, request_id)`. Append-only: no update/delete grants, and rows are written by triggers. Members can read only their own workspace's log, and only with `report.workspace`.
+`audit_log(id, workspace_id, actor_user_id, entity, entity_id, action, before jsonb, after jsonb, at, request_id)`. Append-only: no update/delete grants, and rows are written by triggers. Members can read only their own workspace's log, and only with `audit.view`.
 
 ## 6. Workspace configuration (versioned) — P1 schema, P2 UI
 

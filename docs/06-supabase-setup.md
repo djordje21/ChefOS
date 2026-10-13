@@ -21,7 +21,7 @@ Dashboard menu names change from time to time. If a label below doesn't match ex
 | **URL Configuration** | Site URL = `http://localhost:3000` for dev (the production domain on prod). Redirect URLs: `http://localhost:3000/**`, and later the Vercel preview pattern and the production domain |
 | **Attack Protection** | Turn on CAPTCHA (Cloudflare Turnstile or hCaptcha) before the app is public. Leaked-password protection if your plan offers it |
 | **Emails → SMTP** | The built-in sender is heavily rate-limited and meant for testing only. Before real users, connect your own SMTP (Resend, Postmark, Amazon SES…) using a domain you own |
-| **Emails → Templates** | Confirm signup, Invite, Magic link, Reset password: we'll supply ChefOS-branded templates in Phase 1 |
+| **Emails → Templates** | The default templates work: ChefOS's `/auth/confirm` route handles both the default link (PKCE `code`) and the `{{ .TokenHash }}` style. Branded templates are optional. ChefOS invitations are links created in the app, not Supabase "Invite user" emails |
 | Sessions / MFA | Default for now; TOTP MFA for owners comes later |
 
 ## 3. Keys and credentials

@@ -21,7 +21,7 @@ The first-draft data model was already multi-tenant (`organization_id` + RLS on 
 * The settings were a single row with one VAT rate, one allowance, one rounding step: a copy of `Settings!B5:B7`.
 * The acceptance criteria were defined as "reconciles to source workbook totals".
 * The engine was designed around three units and "purchase price excl. VAT".
-* The examples (currency, outlet names from the source workbook) leaked into defaults.
+* Example currency and outlet names from the source workbook leaked into defaults.
 
 The corrected architecture has three layers:
 
