@@ -19,7 +19,7 @@ test("sign up → confirm email → create workspace → sign out → sign back 
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page.getByText("Check your inbox")).toBeVisible();
   await signIn(page, email);
-  await expect(page.getByRole("alert")).toContainText("Confirm your email");
+  await expect(page.getByRole("alert").filter({ hasText: "Confirm your email" })).toBeVisible();
 
   // Confirming signs the user in; a new account has no workspace and no privileges.
   await page.goto(await emailLink(email));
@@ -78,7 +78,7 @@ test("invitation: an outlet-restricted member sees only their outlet, and no oth
 
   // The link is single-use, and other workspaces are not reachable by URL.
   await memberPage.goto(inviteLink);
-  await expect(memberPage.getByRole("alert")).toContainText("already been used");
+  await expect(memberPage.getByRole("alert").filter({ hasText: "already been used" })).toBeVisible();
   await memberPage.goto(`/app/w/${crypto.randomUUID()}`);
   await expect(memberPage.getByRole("heading", { name: "Not found" })).toBeVisible();
 
