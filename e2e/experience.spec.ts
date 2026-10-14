@@ -1,57 +1,34 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * The public cinematic landing and its five destinations. These pages are
- * frontend-only (fictional data, no Supabase calls), so they need no account.
+ * The public landing and its five destinations. These pages are frontend-only
+ * (fictional data, no Supabase calls), so they need no account.
  */
 
-const LINE = "Good morning, Chef. What are we working on today?";
-const tickets = (page: import("@playwright/test").Page) => page.getByRole("navigation", { name: "Choose where to work" }).getByRole("link");
+const destinations = (page: import("@playwright/test").Page) => page.getByRole("navigation", { name: "ChefOS destinations" }).getByRole("link");
 
-test("intro plays, reveals five destinations and is remembered", async ({ page, context }) => {
-  await context.clearCookies();
+test("landing shows the headline and the five destinations at once", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("button", { name: "Skip intro" })).toBeVisible();
-  await expect(page.getByText(LINE).first()).toBeAttached();
-  await expect(page.getByRole("button", { name: "Replay intro" })).toBeVisible({ timeout: 15_000 });
-  await expect(tickets(page)).toHaveCount(5);
-
-  const cookie = (await context.cookies()).find((c) => c.name === "chefos_intro");
-  expect(cookie?.value).toBe("seen");
-
-  // Returning visitors land straight on the menu.
-  await page.reload();
-  await expect(page.getByRole("button", { name: "Replay intro" })).toBeVisible();
-  await expect(tickets(page).first()).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Your kitchen\.\s*Your craft\.\s*Your command\./);
+  await expect(destinations(page)).toHaveCount(5);
+  await expect(destinations(page).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/login");
 });
 
-test("intro can be skipped with the button and with Esc", async ({ page, context }) => {
-  await context.clearCookies();
-  await page.goto("/");
-  await page.getByRole("button", { name: "Skip intro" }).click();
-  await expect(page.getByRole("button", { name: "Replay intro" })).toBeVisible();
-
-  await context.clearCookies();
-  await page.goto("/");
-  await expect(page.getByRole("button", { name: "Skip intro" })).toBeVisible();
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("button", { name: "Replay intro" })).toBeVisible();
-
-  // ?intro=1 replays even for returning visitors.
-  await page.goto("/?intro=1");
-  await expect(page.getByRole("button", { name: "Skip intro" })).toBeVisible();
-});
-
-test("reduced motion goes straight to the menu", async ({ page, context }) => {
-  await context.clearCookies();
+test("reduced motion: the landing is immediately usable", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  await expect(page.getByRole("button", { name: "Replay intro" })).toBeVisible({ timeout: 2_000 });
-  await expect(tickets(page)).toHaveCount(5);
+  await expect(destinations(page).first()).toBeVisible({ timeout: 2_000 });
 });
 
-test("each ticket opens its destination", async ({ page, context, baseURL }) => {
-  await context.addCookies([{ name: "chefos_intro", value: "seen", url: baseURL! }]);
+test("destinations are reachable with the keyboard", async ({ page }) => {
+  await page.goto("/");
+  await destinations(page).filter({ hasText: "Food Cost" }).focus();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/food-cost$/);
+});
+
+test("each destination opens and leads back to the kitchen", async ({ page }) => {
   const expected: [RegExp, string, RegExp][] = [
     [/Recipe Book/, "/recipes", /Harbour & Pine Group/],
     [/Food Cost/, "/food-cost", /Roast chicken supreme/],
@@ -59,9 +36,9 @@ test("each ticket opens its destination", async ({ page, context, baseURL }) => 
     [/Industry News/, "/news", /The morning papers/],
     [/Pre-Opening/, "/pre-opening", /From blueprint to first service/],
   ];
-  for (const [ticket, path, heading] of expected) {
+  for (const [name, path, heading] of expected) {
     await page.goto("/");
-    await tickets(page).filter({ hasText: ticket }).click();
+    await destinations(page).filter({ hasText: name }).click();
     await expect(page).toHaveURL(new RegExp(`${path}$`));
     await expect(page.getByRole("heading", { name: heading }).first()).toBeVisible();
     await page.getByRole("link", { name: /Back to the kitchen/ }).click();

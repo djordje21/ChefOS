@@ -19,3 +19,9 @@ __pycache__/
 .DS_Store
 preview/dist/
 preview/.preview.css
+
+# reference images supplied for local design review only (rights not cleared) — never commit
+public/experience/local/
+
+# screenshots that contain the unlicensed reference photo — local review only, never commit
+artifacts/review/

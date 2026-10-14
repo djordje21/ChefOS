@@ -2,41 +2,20 @@ export type DestinationId = "recipes" | "food-cost" | "journal" | "news" | "pre-
 
 export type Destination = {
   id: DestinationId;
-  order: string; // printed on the kitchen ticket
+  number: string;
   title: string;
   line: string;
   href: string;
-  status: "demo" | "placeholder" | "directory" | "intro";
+  /** Honest, short state of the destination today (shown next to it on the landing). */
   statusLabel: string;
-  /** Visual identity: ink colour for the ticket stamp and the destination header. */
+  /** Accent colour of the destination's page header. */
   ink: string;
-  paper: string;
 };
 
 export const DESTINATIONS: Destination[] = [
-  {
-    id: "recipes", order: "01", title: "The Recipe Book", line: "Recipes, sub-recipes, methods and allergens.",
-    href: "/recipes", status: "demo", statusLabel: "Public demo · fictional data", ink: "#7a3f22", paper: "#f3ebdf",
-  },
-  {
-    id: "food-cost", order: "02", title: "Food Cost", line: "Cost every gram. Price every plate.",
-    href: "/food-cost", status: "demo", statusLabel: "Public demo · live calculations", ink: "#1f5c43", paper: "#eef1ec",
-  },
-  {
-    id: "journal", order: "03", title: "The Journal", line: "Technique, leadership and the business of the kitchen.",
-    href: "/journal", status: "placeholder", statusLabel: "Articles coming soon", ink: "#23365c", paper: "#eef0f5",
-  },
-  {
-    id: "news", order: "04", title: "Industry News", line: "Hand-picked hospitality and foodservice publications.",
-    href: "/news", status: "directory", statusLabel: "Curated directory", ink: "#8c2a24", paper: "#f2eeea",
-  },
-  {
-    id: "pre-opening", order: "05", title: "Pre-Opening", line: "From blueprint to first service.",
-    href: "/pre-opening", status: "intro", statusLabel: "Introduction · demo board", ink: "#1d5674", paper: "#e9f1f5",
-  },
+  { id: "recipes", number: "01", title: "The Recipe Book", line: "Recipes, techniques, and culinary development.", href: "/recipes", statusLabel: "Demo", ink: "#7a3f22" },
+  { id: "food-cost", number: "02", title: "Food Cost", line: "Recipe costing, margins, and profitability.", href: "/food-cost", statusLabel: "Demo", ink: "#1f5c43" },
+  { id: "journal", number: "03", title: "The Journal", line: "Culinary knowledge, leadership, and kitchen management.", href: "/journal", statusLabel: "Coming soon", ink: "#23365c" },
+  { id: "news", number: "04", title: "Industry News", line: "Relevant hospitality and culinary industry publications.", href: "/news", statusLabel: "Directory", ink: "#8c2a24" },
+  { id: "pre-opening", number: "05", title: "Pre-Opening", line: "Hotel kitchen planning, setup, and operational readiness.", href: "/pre-opening", statusLabel: "Preview", ink: "#1d5674" },
 ];
-
-export const CHEF_LINE = "Good morning, Chef. What are we working on today?";
-
-/** Remembered for a year so returning visitors land straight on the menu. Contains no personal data. */
-export const INTRO_COOKIE = "chefos_intro";

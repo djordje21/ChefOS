@@ -7,7 +7,7 @@
  *   node scripts/build-preview.mjs <out-dir>
  */
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { build } from "esbuild";
 
@@ -15,8 +15,8 @@ const root = path.resolve(import.meta.dirname, "..");
 const out = path.resolve(process.argv[2] ?? path.join(root, "preview/dist"));
 mkdirSync(out, { recursive: true });
 
-// The scene images are served from /public in the app; inline them here.
-const dataUri = (f) => `data:image/webp;base64,${readFileSync(path.join(root, "public", f)).toString("base64")}`;
+// The hero photograph is served from /public in the app; inline it here when the file is
+// present. A missing file (e.g. the git-ignored reference photo) leaves the plain backdrop.
 const inlineAssets = {
   name: "inline-experience-assets",
   setup(b) {
@@ -24,9 +24,12 @@ const inlineAssets = {
       args.importer.includes(`${path.sep}experience${path.sep}`) ? { path: "experience-assets", namespace: "inline" } : undefined,
     );
     b.onLoad({ filter: /.*/, namespace: "inline" }, () => {
-      const src = readFileSync(path.join(root, "src/experience/assets.ts"), "utf8")
-        .replace(/^\s*srcSet:.*$/m, "") // one size is enough for the preview
-        .replace(/"\/(experience\/[\w.-]+\.webp)"/g, (_, f) => JSON.stringify(dataUri(f)));
+      const src = readFileSync(path.join(root, "src/experience/assets.ts"), "utf8").replace(/"\/(experience\/[\w./-]+\.(jpe?g|webp|avif))"/g, (m, f, ext) => {
+        const file = path.join(root, "public", f);
+        if (!existsSync(file)) return m;
+        const type = ext.startsWith("jp") ? "jpeg" : ext;
+        return JSON.stringify(`data:image/${type};base64,${readFileSync(file).toString("base64")}`);
+      });
       return { contents: src, loader: "ts" };
     });
   },

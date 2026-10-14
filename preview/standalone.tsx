@@ -14,7 +14,6 @@ import { NewsDirectory } from "@/experience/pages/News";
 import { PreOpening } from "@/experience/pages/PreOpening";
 
 const current = () => decodeURIComponent(location.hash.slice(1)) || "/";
-let introSeen = false;
 
 function SignInNotice() {
   return (
@@ -27,7 +26,7 @@ function SignInNotice() {
 }
 
 function Page({ path }: { path: string }) {
-  if (path === "/") return <Landing introSeen={introSeen} />;
+  if (path === "/") return <Landing />;
   if (path === "/recipes") return <DemoApp initialScreen="book" />;
   if (path === "/food-cost" || path === "/demo") return <DemoApp initialScreen="recipes" />;
   if (path === "/journal") return <JournalIndex />;
@@ -42,7 +41,6 @@ function PreviewSite() {
   const [path, setPath] = useState(current);
   useEffect(() => {
     const onHash = () => {
-      if (path === "/") introSeen = true;
       setPath(current());
       window.scrollTo(0, 0);
     };
