@@ -4,7 +4,7 @@ Status: **for review**. No migrations and no real business data were added in th
 
 ## Where to look
 
-* **Hosted preview (private link):** https://claude.ai/artifact/FwV9SR2EPkA38NW4p8uj9w. It is the same demo as `/demo`, built into one page by `scripts/build-preview.mjs`. Only you can open it until you share it from the page's Share menu.
+* **Hosted preview (private link):** https://claude.ai/artifact/FwV9SR2EPkA38NW4p8uj9w. Since the cinematic milestone it contains the kitchen landing and all five destinations (see `docs/11-cinematic-experience.md`), built into one page by `scripts/build-preview.mjs`. Only you can open it until you share it from the page's Share menu.
 * **Locally:** see "Run it on your computer" below.
 
 ## Every route
@@ -20,13 +20,17 @@ Status: **for review**. No migrations and no real business data were added in th
 | `/app/w/[id]/members` | Team, roles, outlet access, invitations | **Working** |
 | `/app/w/[id]/audit` | Audit log | **Working** |
 | `/invite/[token]` | Accept an invitation | **Working** |
-| `/demo` (only when `NEXT_PUBLIC_ENABLE_DEMO=1`) | Demo of the screens below | See next table |
+| `/` | Cinematic kitchen landing with five destinations | **Public**, frontend only. See `docs/11-cinematic-experience.md` |
+| `/recipes`, `/food-cost` | Demo of the screens below (opens on Recipe book / Food cost) | **Public demo**, fictional data. See next table |
+| `/journal`, `/journal/[slug]`, `/news`, `/pre-opening` | Journal, Industry News, Pre-Opening | **Public**, placeholder content / demo board |
+| `/demo` | Old link | Redirects to `/food-cost` |
 
 Screens inside the demo:
 
 | Screen | What is real | What is not |
 |---|---|---|
-| **Recipe costing** (primary) | Every figure is computed by the real engine (`src/lib/costing`): line costs with net/gross basis and yield, sub-recipes, allowance, cost per portion, scaling, food cost on the net price, suggested price with the workspace's rounding rule, contribution. Inputs reject invalid numbers | Data is fictional and kept only in the browser tab. No versions, approvals or saving |
+| **Recipe book** | Recipe cards with live cost and food cost from the engine; reading view (ingredients, method, allergens); new draft recipe (validated form) that can then be costed | Prototype: fictional, in memory only, no versions or approvals |
+| **Food cost** (recipe costing, primary) | Every figure is computed by the real engine (`src/lib/costing`): line costs with net/gross basis and yield, sub-recipes, allowance, cost per portion, scaling, food cost on the net price, suggested price with the workspace's rounding rule, contribution. Inputs reject invalid numbers | Data is fictional and kept only in the browser tab. No versions, approvals or saving |
 | **Dashboard** | KPIs, food cost against target, dishes needing attention, and the price-change impact (recomputed with old vs new prices), all computed from the demo data | No sales data, no history beyond the fictional previous prices |
 | **Ingredient master** | Usable cost per kg/l/piece; editing a price, pack, tax or yield shows the recalculated effect on dishes before applying | Fictional list. "Apply" changes the preview only. No suppliers database, approvals or imports |
 | **Workspace settings** | Costing rules validated with the engine's own schema. A new version is applied to every recipe immediately; tax rate and category targets are editable | Kept in memory only |
@@ -37,8 +41,8 @@ The whole demo is labelled on every screen ("Demo mode · fictional … · nothi
 
 ## Security
 
-* `/demo` returns 404 unless `NEXT_PUBLIC_ENABLE_DEMO=1`. It makes no database or Auth calls and needs no credentials.
-* Production auth and RLS are unchanged. A unit test fails if any real app code other than `app/demo/page.tsx` imports the demo module.
+* The demo is public at `/recipes` and `/food-cost` (no flag any more). It runs entirely in the browser: no database or Auth calls, no credentials, nothing saved. The proxy skips the Auth round trip on these public paths only; `/app` and `/account` are still checked with `getUser()` on every request.
+* Production auth and RLS are unchanged. A unit test fails if any real app code other than `app/recipes/page.tsx` and `app/food-cost/page.tsx` imports the demo module.
 * All demo data is invented (`src/demo/data.ts`). None of it is a default for real workspaces, and the demo assumes no food-cost target: a dish without one shows "No target set".
 
 ## What was verified, and how
@@ -71,7 +75,6 @@ npm ci
 Create a file named `.env.local` in the project folder with:
 
 ```
-NEXT_PUBLIC_ENABLE_DEMO=1
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_local_placeholder
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
@@ -84,6 +87,6 @@ npm run build
 npm start
 ```
 
-Open http://localhost:3000/demo. The sign-in pages at http://localhost:3000/login render too, but signing in needs a Supabase project (local `supabase start` or your `chefos-dev`; see `docs/06-supabase-setup.md`).
+Open http://localhost:3000/ (the kitchen) or go straight to http://localhost:3000/food-cost. The sign-in pages at http://localhost:3000/login render too, but signing in needs a Supabase project (local `supabase start` or your `chefos-dev`; see `docs/06-supabase-setup.md`).
 
 To rebuild the single-file hosted preview: `node scripts/build-preview.mjs`. It writes to `preview/dist/` (git-ignored).

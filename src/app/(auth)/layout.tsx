@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Logo } from "@/components/ui";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
-  const demo = process.env.NEXT_PUBLIC_ENABLE_DEMO === "1";
   return (
     <div className="grid min-h-dvh lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
       <aside className="relative hidden overflow-hidden border-r border-line bg-surface-2 lg:flex lg:flex-col lg:justify-between lg:p-10">
@@ -28,11 +27,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="mx-auto w-full max-w-sm">
           <Link href="/" className="mb-8 inline-block lg:hidden" aria-label="ChefOS home"><Logo /></Link>
           {children}
-          {demo && (
-            <p className="mt-8 border-t border-line pt-4 text-sm text-muted">
-              Just looking? <a className="font-semibold text-accent hover:underline" href="/demo">Open the interface demo</a> with fictional data. No account needed.
-            </p>
-          )}
+          <p className="mt-8 border-t border-line pt-4 text-sm text-muted">
+            Just looking? <Link className="font-semibold text-accent hover:underline" href="/food-cost">Try the Food Cost demo</Link> with fictional data, or{" "}
+            <Link className="font-semibold text-accent hover:underline" href="/">go back to the kitchen</Link>. No account needed.
+          </p>
         </div>
       </main>
     </div>

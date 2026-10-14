@@ -2,12 +2,12 @@
 
 import { createContext, useContext, useMemo, useReducer, type ReactNode } from "react";
 import { costingPolicySchema, parse } from "@/lib/costing/schema";
-import { DEMO_WORKSPACES, type DemoIngredient, type DemoLine, type DemoWorkspace } from "./data";
+import { DEMO_WORKSPACES, type DemoDish, type DemoIngredient, type DemoLine, type DemoRecipe, type DemoWorkspace } from "./data";
 import { DEMO_TODAY, evaluate, type Evaluation } from "./model";
 
 /** In-memory only. Nothing is sent anywhere or saved; reloading the page resets the demo. */
 
-export type Screen = "dashboard" | "recipes" | "ingredients" | "settings" | "about";
+export type Screen = "book" | "dashboard" | "recipes" | "ingredients" | "settings" | "about";
 
 type State = {
   workspaces: DemoWorkspace[];
@@ -32,17 +32,18 @@ type Action =
   | { type: "policy"; policy: unknown }
   | { type: "categoryTarget"; name: string; target: string }
   | { type: "menuTax"; rate: string }
+  | { type: "addRecipe"; recipe: DemoRecipe; dish: DemoDish | null }
   | { type: "notice"; text: string | null }
-  | { type: "reset" };
+  | { type: "reset"; screen: Screen };
 
 const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x)) as T;
 
-function initial(): State {
+function initial(screen: Screen): State {
   return {
     workspaces: clone(DEMO_WORKSPACES),
     workspaceId: DEMO_WORKSPACES[0]!.id,
     outletId: "all",
-    screen: "recipes",
+    screen,
     recipeId: "chicken",
     ingredientId: null,
     notice: null,
@@ -113,10 +114,16 @@ function reducer(state: State, a: Action): State {
       return updateWs(state, (ws) => ({ ...ws, categories: ws.categories.map((c) => (c.name === a.name ? { ...c, target: a.target } : c)) }));
     case "menuTax":
       return updateWs(state, (ws) => ({ ...ws, menuTaxRate: { ...ws.menuTaxRate, rate: a.rate } }));
+    case "addRecipe":
+      return {
+        ...updateWs(state, (ws) => ({ ...ws, recipes: [...ws.recipes, a.recipe], dishes: a.dish ? [...ws.dishes, a.dish] : ws.dishes })),
+        recipeId: a.recipe.id,
+        notice: `"${a.recipe.name}" added as a draft (demo only, not saved).`,
+      };
     case "notice":
       return { ...state, notice: a.text };
     case "reset":
-      return { ...initial(), notice: "Demo data reset." };
+      return { ...initial(a.screen), notice: "Demo data reset." };
   }
 }
 
@@ -129,8 +136,8 @@ type Ctx = {
 
 const DemoContext = createContext<Ctx | null>(null);
 
-export function DemoProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, undefined, initial);
+export function DemoProvider({ children, initialScreen = "recipes" }: { children: ReactNode; initialScreen?: Screen }) {
+  const [state, dispatch] = useReducer(reducer, initialScreen, initial);
   const ws = state.workspaces.find((w) => w.id === state.workspaceId)!;
   const evaluation = useMemo(() => evaluate(ws), [ws]);
   return <DemoContext.Provider value={{ state, dispatch, ws, evaluation }}>{children}</DemoContext.Provider>;

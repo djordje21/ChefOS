@@ -13,7 +13,6 @@ export default async function WorkspaceLayout({ children, params }: { children: 
     { href: `${base}/members`, label: "Team", show: true },
     { href: `${base}/audit`, label: "Audit log", show: can("audit.view") },
   ];
-  const demo = process.env.NEXT_PUBLIC_ENABLE_DEMO === "1";
   return (
     <>
       <AppHeader email={user.email}>
@@ -23,11 +22,9 @@ export default async function WorkspaceLayout({ children, params }: { children: 
           {nav.filter((n) => n.show).map((n) => (
             <Link key={n.href} href={n.href} className="rounded-md px-2 py-1 font-medium text-muted hover:bg-surface-2 hover:text-ink">{n.label}</Link>
           ))}
-          {demo && (
-            <a href="/demo" className="rounded-md px-2 py-1 font-medium text-muted hover:bg-surface-2 hover:text-ink" title="Recipe costing and ingredients are not built yet; see the interface demo with fictional data">
-              Recipe costing <span className="ml-1 rounded-full border border-warn/30 bg-warn-soft px-1.5 py-0.5 text-[0.65rem] font-semibold text-warn">demo</span>
-            </a>
-          )}
+          <Link href="/food-cost" className="rounded-md px-2 py-1 font-medium text-muted hover:bg-surface-2 hover:text-ink" title="Recipe costing and ingredients are not built yet; see the public demo with fictional data">
+            Recipe costing <span className="ml-1 rounded-full border border-warn/30 bg-warn-soft px-1.5 py-0.5 text-[0.65rem] font-semibold text-warn">demo</span>
+          </Link>
         </nav>
       </AppHeader>
       <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>

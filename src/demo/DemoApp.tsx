@@ -1,17 +1,20 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
+import { SiteLink } from "@/experience/nav";
 import { About } from "./screens/About";
 import { Dashboard } from "./screens/Dashboard";
 import { Ingredients } from "./screens/Ingredients";
+import { RecipeBook } from "./screens/RecipeBook";
 import { RecipeCosting } from "./screens/RecipeCosting";
 import { Settings } from "./screens/Settings";
 import { DemoProvider, useDemo, type Screen } from "./store";
 import { Button, SelectInput, cx } from "./ui";
 
 const NAV: { screen: Screen; label: string; icon: ReactNode }[] = [
+  { screen: "book", label: "Recipe book", icon: <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5M9 7h7M9 10.5h5" /> },
   { screen: "dashboard", label: "Dashboard", icon: <path d="M3 13h8V3H3zm10 8h8V11h-8zM3 21h8v-6H3zm10-18v6h8V3z" /> },
-  { screen: "recipes", label: "Recipe costing", icon: <path d="M6 2h9l5 5v15H6zM14 2v6h6M9 13h8M9 17h5" /> },
+  { screen: "recipes", label: "Food cost", icon: <path d="M6 2h9l5 5v15H6zM14 2v6h6M9 13h8M9 17h5" /> },
   { screen: "ingredients", label: "Ingredients", icon: <path d="M4 7h16M4 12h16M4 17h10" /> },
   { screen: "settings", label: "Settings", icon: <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7zM19.4 13a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.4 7.4 0 0 0-1.7-1L15 3.5h-4l-.4 2.5a7.4 7.4 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.4 7.4 0 0 0 1.7 1l.4 2.5h4l.4-2.5a7.4 7.4 0 0 0 1.7-1l2.4 1 2-3.4z" /> },
   { screen: "about", label: "What works?", icon: <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 8h.01M11 12h1v5h1" /> },
@@ -48,6 +51,7 @@ function Shell() {
   }, [state.notice, dispatch]);
 
   const screen = {
+    book: <RecipeBook />,
     dashboard: <Dashboard />,
     recipes: <RecipeCosting />,
     ingredients: <Ingredients />,
@@ -59,12 +63,17 @@ function Shell() {
     <div className="min-h-dvh bg-canvas text-ink">
       <div className="border-b border-warn/30 bg-warn-soft px-4 py-1.5 text-center text-xs text-warn">
         <strong className="font-semibold">Demo mode</strong> · fictional restaurants, suppliers, prices and recipes · nothing is saved ·{" "}
-        <button className="font-semibold underline underline-offset-2" onClick={() => dispatch({ type: "reset" })}>Reset demo data</button>
+        <button className="font-semibold underline underline-offset-2" onClick={() => dispatch({ type: "reset", screen: state.screen })}>Reset demo data</button>
       </div>
       <div className="lg:grid lg:grid-cols-[232px_minmax(0,1fr)]">
         <aside className="border-b border-line bg-surface lg:sticky lg:top-0 lg:h-dvh lg:border-b-0 lg:border-r">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3 lg:block lg:space-y-5 lg:py-5">
-            <Logo />
+            <div className="flex items-center gap-3 lg:block lg:space-y-3">
+              <SiteLink href="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-ink">
+                <span aria-hidden="true">←</span> Back to the kitchen
+              </SiteLink>
+              <div><Logo /></div>
+            </div>
             <div className="flex min-w-0 flex-1 flex-wrap gap-2 lg:block lg:space-y-2">
               <label className="min-w-[10rem] flex-1 text-[0.7rem] font-semibold uppercase tracking-wider text-muted" htmlFor="ws-switch">
                 Workspace
@@ -109,9 +118,9 @@ function Shell() {
   );
 }
 
-export function DemoApp() {
+export function DemoApp({ initialScreen = "recipes" }: { initialScreen?: Screen }) {
   return (
-    <DemoProvider>
+    <DemoProvider initialScreen={initialScreen}>
       <Shell />
     </DemoProvider>
   );

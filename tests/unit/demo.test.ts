@@ -30,14 +30,15 @@ describe("interface demo", () => {
     expect([dessert.state, dessert.target, dessert.pricing]).toEqual(["no_target", null, null]);
   });
 
-  it("demo code is reachable only from the /demo route and the preview build", () => {
+  it("demo code is reachable only from the public demo routes and the preview build", () => {
     const root = path.resolve(import.meta.dirname, "../../src");
     const walk = (d: string): string[] =>
       readdirSync(d).flatMap((f) => (statSync(path.join(d, f)).isDirectory() ? walk(path.join(d, f)) : [path.join(d, f)]));
     const importers = walk(root)
       .filter((f) => !f.startsWith(path.join(root, "demo") + path.sep) && /\.(ts|tsx)$/.test(f))
       .filter((f) => readFileSync(f, "utf8").includes("@/demo/"))
-      .map((f) => path.relative(root, f));
-    expect(importers).toEqual([path.join("app", "demo", "page.tsx")]);
+      .map((f) => path.relative(root, f))
+      .sort();
+    expect(importers).toEqual([path.join("app", "food-cost", "page.tsx"), path.join("app", "recipes", "page.tsx")]);
   });
 });

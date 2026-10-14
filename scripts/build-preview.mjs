@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
- * Builds a single self-contained HTML file of the interface demo (fictional data)
- * for hosting as a private preview page. React is loaded from cdnjs; everything
- * else (app code, decimal.js, zod, CSS) is inlined.
+ * Builds a single self-contained HTML file of the cinematic landing, the five
+ * destinations and the interface demo (fictional data) for hosting as a private
+ * preview page. React is loaded from cdnjs; everything else (app code,
+ * decimal.js, zod, CSS, the temporary scene images as data URIs) is inlined.
  *   node scripts/build-preview.mjs <out-dir>
  */
 import { execFileSync } from "node:child_process";
@@ -14,7 +15,26 @@ const root = path.resolve(import.meta.dirname, "..");
 const out = path.resolve(process.argv[2] ?? path.join(root, "preview/dist"));
 mkdirSync(out, { recursive: true });
 
+// The scene images are served from /public in the app; inline them here.
+const dataUri = (f) => `data:image/webp;base64,${readFileSync(path.join(root, "public", f)).toString("base64")}`;
+const inlineAssets = {
+  name: "inline-experience-assets",
+  setup(b) {
+    b.onResolve({ filter: /^\.\/assets$/ }, (args) =>
+      args.importer.includes(`${path.sep}experience${path.sep}`) ? { path: "experience-assets", namespace: "inline" } : undefined,
+    );
+    b.onLoad({ filter: /.*/, namespace: "inline" }, () => {
+      const src = readFileSync(path.join(root, "src/experience/assets.ts"), "utf8")
+        .replace(/^\s*srcSet:.*$/m, "") // one size is enough for the preview
+        .replace(/"\/(experience\/[\w.-]+\.webp)"/g, (_, f) => JSON.stringify(dataUri(f)));
+      return { contents: src, loader: "ts" };
+    });
+  },
+};
+
 const js = await build({
+  plugins: [inlineAssets],
+  loader: { ".css": "empty" },
   entryPoints: [path.join(root, "preview/standalone.tsx")],
   bundle: true,
   minify: true,
@@ -28,14 +48,14 @@ const js = await build({
     react: path.join(root, "preview/react-shim.cjs"),
     "react-dom/client": path.join(root, "preview/react-dom-shim.cjs"),
   },
-  define: { "process.env.NODE_ENV": '"production"', "process.env.NEXT_PUBLIC_ENABLE_DEMO": '"1"' },
+  define: { "process.env.NODE_ENV": '"production"' },
   legalComments: "none",
 });
 
 const globals = readFileSync(path.join(root, "src/app/globals.css"), "utf8").replace(
   '@import "tailwindcss";',
-  '@import "tailwindcss" source(none);\n@source "../src/demo";',
-);
+  '@import "tailwindcss" source(none);\n@source "../src/demo";\n@source "../src/experience";\n@source "./standalone.tsx";',
+) + readFileSync(path.join(root, "src/experience/experience.css"), "utf8");
 const cssIn = path.join(root, "preview/.preview.css");
 writeFileSync(cssIn, globals);
 const cssOut = path.join(out, "preview.css");
@@ -43,7 +63,7 @@ execFileSync(path.join(root, "node_modules/.bin/tailwindcss"), ["-i", cssIn, "-o
 const css = readFileSync(cssOut, "utf8");
 
 const code = js.outputFiles[0].text.replace(/<\/script/gi, "<\\/script");
-const html = `<title>ChefOS Costing Preview</title>
+const html = `<title>ChefOS Kitchen Preview</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500&display=swap">

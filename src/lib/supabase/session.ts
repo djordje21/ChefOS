@@ -6,8 +6,22 @@ import { sameHostUrl } from "@/lib/redirect";
 
 const PROTECTED_PREFIXES = ["/app", "/account"];
 
+/**
+ * Public pages that never read the session: the kitchen landing and the
+ * frontend-only destinations (fictional data, no Supabase calls). Skipping the
+ * Auth round trip keeps them fast and working even when Auth is unreachable.
+ * Everything else, including every protected route, still goes through getUser().
+ */
+const PUBLIC_PREFIXES = ["/recipes", "/food-cost", "/journal", "/news", "/pre-opening", "/demo"];
+const matches = (path: string, prefixes: string[]) => prefixes.some((p) => path === p || path.startsWith(`${p}/`));
+
+export function isPublicPath(path: string) {
+  return path === "/" || matches(path, PUBLIC_PREFIXES);
+}
+
 /** Refreshes the auth session cookie on every request and guards private routes. */
 export async function updateSession(request: NextRequest) {
+  if (isPublicPath(request.nextUrl.pathname)) return NextResponse.next({ request });
   let response = NextResponse.next({ request });
   const { url, key } = publicEnv();
   const supabase = createServerClient<Database>(url, key, {
@@ -27,7 +41,7 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  if (!user && PROTECTED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`))) {
+  if (!user && matches(path, PROTECTED_PREFIXES)) {
     return NextResponse.redirect(sameHostUrl(request, `/login?next=${encodeURIComponent(path + request.nextUrl.search)}`));
   }
   return response;
